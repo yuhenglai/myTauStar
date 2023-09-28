@@ -591,7 +591,7 @@ tauStarTest <- function(x, y, mode="auto", resamples = 1000) {
   if (length(resamples) != 1 || resamples %% 1 != 0) {
     stop("resamples must be integer valued.")
   }
-  xIsDis = isDiscrete(x)
+  xIsDis = FALSE
   yIsDis = isDiscrete(y)
   n = length(x)
 
