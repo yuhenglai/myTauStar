@@ -201,7 +201,7 @@ binaryQuantileSearch = function(pDistFunc, p, lastLeft, lastRight,
 #' @return dHoeffInd gives the density, pHoeffInd gives the distribution
 #'         function, qHoeffInd gives the quantile function, and rHoeffInd
 #'         generates random samples.
-pHoeffInd <- function(x, lower.tail = T, error = 10^-5) {
+pHoeffInd <- function(x, lower.tail = T, error = 0.01) { # 10^-5
   if (lower.tail) {
     return(HoeffIndCdfRCPP(x + 1, error))
   }
@@ -402,7 +402,7 @@ qDisHoeffInd <- function(p, probs1, probs2, error = 10^-4) {
 #' @return dMixHoeffInd gives the density, pMixHoeffInd gives the distribution
 #'         function, qMixHoeffInd gives the quantile function, and
 #'         rMixHoeffInd generates random samples.
-pMixHoeffInd <- function(x, probs, lower.tail = T, error = 10^-6) {
+pMixHoeffInd <- function(x, probs, lower.tail = T, error = 0.01) { # 10^-6
   if (!isProbVector(probs)) {
     stop("probs in pMixHoeffInd is not a probability vector.")
   }
