@@ -402,7 +402,7 @@ qDisHoeffInd <- function(p, probs1, probs2, error = 10^-4) {
 #' @return dMixHoeffInd gives the density, pMixHoeffInd gives the distribution
 #'         function, qMixHoeffInd gives the quantile function, and
 #'         rMixHoeffInd generates random samples.
-pMixHoeffInd <- function(x, probs, lower.tail = T, error = 0.01) { # 10^-6
+pMixHoeffInd <- function(x, probs, lower.tail = T, error = 0.01, k = 5) { # 10^-6
   if (!isProbVector(probs)) {
     stop("probs in pMixHoeffInd is not a probability vector.")
   }
@@ -410,7 +410,7 @@ pMixHoeffInd <- function(x, probs, lower.tail = T, error = 0.01) { # 10^-6
     lowerTailProb = if (x >= 0) 1 else 0
   } else {
     eigenP = eigenForDiscreteProbs(probs)
-    lowerTailProb = HoeffIndMixedCdfRCPP(x + 2 * sum(eigenP), eigenP, error)
+    lowerTailProb = HoeffIndMixedCdfRCPP(x + 2 * sum(eigenP), eigenP, error, k)
   }
   if (lower.tail) {
     return(lowerTailProb)
