@@ -145,7 +145,7 @@ double numericalCfInversion(IntegrandEvaluator& intEval, double x, double T,
   }
   double integrandError = 0.01; // convCrit * .0001
 
-  int numInts = 10;
+  int numInts = 5;
   double intWidth = T / numInts;
   arma::vec positions(numInts);
   arma::vec values(numInts);
