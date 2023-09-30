@@ -582,7 +582,7 @@ isValidDataVector <- function(x) {
 #' y = y + x # make x and y correlated
 #' testResults = tauStarTest(x,y)
 #' print(testResults$pVal) # small p-value
-tauStarTest <- function(x, y, mode="auto", resamples = 1000, error = 0.01) {
+tauStarTest <- function(x, y, mode="auto", resamples = 1000, error = 0.01, k = 5) {
   # if (!isValidDataVector(x) || !isValidDataVector(y) ||
   #     length(x) != length(y)) {
   #   stop(paste("vectors inputted to tauStarTest must be of type numeric or",
@@ -639,7 +639,7 @@ tauStarTest <- function(x, y, mode="auto", resamples = 1000, error = 0.01) {
       y = z
     }
     p = as.numeric(table(y)) / n
-    toReturn$pVal = 1 - pMixHoeffInd(n * toReturn$tStar, probs = p, error = error)
+    toReturn$pVal = 1 - pMixHoeffInd(n * toReturn$tStar, probs = p, error = error, k = k)
   } else if (mode == "permutation") {
     sampleTStars = numeric(resamples)
     for (i in 1:resamples) {
