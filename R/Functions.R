@@ -582,17 +582,17 @@ isValidDataVector <- function(x) {
 #' y = y + x # make x and y correlated
 #' testResults = tauStarTest(x,y)
 #' print(testResults$pVal) # small p-value
-tauStarTest <- function(x, y, mode="auto", resamples = 1000) {
-  if (!isValidDataVector(x) || !isValidDataVector(y) ||
-      length(x) != length(y)) {
-    stop(paste("vectors inputted to tauStarTest must be of type numeric or",
-               "integer and must be the same length"))
-  }
-  if (length(resamples) != 1 || resamples %% 1 != 0) {
-    stop("resamples must be integer valued.")
-  }
+tauStarTest <- function(x, y, mode="auto", resamples = 1000, error = 0.01) {
+  # if (!isValidDataVector(x) || !isValidDataVector(y) ||
+  #     length(x) != length(y)) {
+  #   stop(paste("vectors inputted to tauStarTest must be of type numeric or",
+  #              "integer and must be the same length"))
+  # }
+  # if (length(resamples) != 1 || resamples %% 1 != 0) {
+  #   stop("resamples must be integer valued.")
+  # }
   xIsDis = FALSE
-  yIsDis = isDiscrete(y)
+  yIsDis = TRUE
   n = length(x)
 
   toReturn = list()
@@ -639,7 +639,7 @@ tauStarTest <- function(x, y, mode="auto", resamples = 1000) {
       y = z
     }
     p = as.numeric(table(y)) / n
-    toReturn$pVal = 1 - pMixHoeffInd(n * toReturn$tStar, probs = p)
+    toReturn$pVal = 1 - pMixHoeffInd(n * toReturn$tStar, probs = p, error = error)
   } else if (mode == "permutation") {
     sampleTStars = numeric(resamples)
     for (i in 1:resamples) {
