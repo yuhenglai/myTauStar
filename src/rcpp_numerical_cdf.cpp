@@ -137,7 +137,7 @@ double riemannIntegrate(const arma::vec& positions, const arma::vec& values) {
 *        warning is printed. If maxIter is < 5 then maxIter is set to 5.
 */
 double numericalCfInversion(IntegrandEvaluator& intEval, double x, double T,
-                            double convCrit, int maxIter) {
+                            double convCrit, int maxIter, int k_default = 5) {
   // We implicitly assume that we work only with CDFs that are supported
   // strictly on the non-negative axis. As such we return 0 when x <= 0.
   if (x <= 0) {
@@ -170,7 +170,7 @@ double numericalCfInversion(IntegrandEvaluator& intEval, double x, double T,
   double widthChange = std::fabs(static_cast<double>(oldIntVal - intVal)) + convCrit + 1;
 
   int k = 0;
-  while (k < 2 || (std::max(bisectChange, widthChange) >= convCrit && k < maxIter)) {
+  while (k < k_default || (std::max(bisectChange, widthChange) >= convCrit && k < maxIter)) {
     oldIntVal = intVal;
     if (bisectChange > widthChange) {
       bisect(positions, values, intEval, x, integrandError);
@@ -313,12 +313,12 @@ arma::vec HoeffIndDiscretePdfRCPP(arma::vec x, arma::vec eigenP,
  * Computes the asymptotic CDF function in the mixed case.
  */
 // [[Rcpp::export]]
-arma::vec HoeffIndMixedCdfRCPP(arma::vec x, arma::vec eigenP, double maxError) {
+arma::vec HoeffIndMixedCdfRCPP(arma::vec x, arma::vec eigenP, double maxError, int k) {
   AsymMixedCdfIntegrandEvaluator amcie(eigenP);
   arma::vec cdfVals(x.size());
   for (int i = 0; i < x.size(); i++) {
     cdfVals[i] = boundInZeroOne(
-      numericalCfInversion(amcie, x[i], 20.0, maxError, 12));
+      numericalCfInversion(amcie, x[i], 20.0, maxError, 12, k));
   }
   return cdfVals;
 }
