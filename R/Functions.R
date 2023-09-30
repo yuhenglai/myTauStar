@@ -402,7 +402,7 @@ qDisHoeffInd <- function(p, probs1, probs2, error = 10^-4) {
 #' @return dMixHoeffInd gives the density, pMixHoeffInd gives the distribution
 #'         function, qMixHoeffInd gives the quantile function, and
 #'         rMixHoeffInd generates random samples.
-pMixHoeffInd <- function(x, probs, lower.tail = T, error = 0.01, k = 5) { # 10^-6
+pMixHoeffInd <- function(x, probs, lower.tail = T, error = 0.01) { # 10^-6
   if (!isProbVector(probs)) {
     stop("probs in pMixHoeffInd is not a probability vector.")
   }
@@ -410,7 +410,7 @@ pMixHoeffInd <- function(x, probs, lower.tail = T, error = 0.01, k = 5) { # 10^-
     lowerTailProb = if (x >= 0) 1 else 0
   } else {
     eigenP = eigenForDiscreteProbs(probs)
-    lowerTailProb = HoeffIndMixedCdfRCPP(x + 2 * sum(eigenP), eigenP, error, k)
+    lowerTailProb = HoeffIndMixedCdfRCPP(x + 2 * sum(eigenP), eigenP, error)
   }
   if (lower.tail) {
     return(lowerTailProb)
@@ -582,7 +582,7 @@ isValidDataVector <- function(x) {
 #' y = y + x # make x and y correlated
 #' testResults = tauStarTest(x,y)
 #' print(testResults$pVal) # small p-value
-tauStarTest <- function(x, y, mode="auto", resamples = 1000, error = 0.01, k = 5) {
+tauStarTest <- function(x, y, mode="auto", resamples = 1000, error = 0.01) {
   # if (!isValidDataVector(x) || !isValidDataVector(y) ||
   #     length(x) != length(y)) {
   #   stop(paste("vectors inputted to tauStarTest must be of type numeric or",
@@ -639,7 +639,7 @@ tauStarTest <- function(x, y, mode="auto", resamples = 1000, error = 0.01, k = 5
       y = z
     }
     p = as.numeric(table(y)) / n
-    toReturn$pVal = 1 - pMixHoeffInd(n * toReturn$tStar, probs = p, error = error, k = k)
+    toReturn$pVal = 1 - pMixHoeffInd(n * toReturn$tStar, probs = p, error = error)
   } else if (mode == "permutation") {
     sampleTStars = numeric(resamples)
     for (i in 1:resamples) {
