@@ -137,7 +137,7 @@ double riemannIntegrate(const arma::vec& positions, const arma::vec& values) {
 *        warning is printed. If maxIter is < 5 then maxIter is set to 5.
 */
 double numericalCfInversion(IntegrandEvaluator& intEval, double x, double T,
-                            double convCrit, int maxIter, int k_default = 5) {
+                            double convCrit, int maxIter, int k_default) {
   // We implicitly assume that we work only with CDFs that are supported
   // strictly on the non-negative axis. As such we return 0 when x <= 0.
   if (x <= 0) {
