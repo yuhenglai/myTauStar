@@ -294,7 +294,7 @@ isProb <- function(prob) {
 #' @return dDisHoeffInd gives the density, pDisHoeffInd gives the distribution
 #'         function, qDisHoeffInd gives the quantile function, and
 #'         rDisHoeffInd generates random samples.
-pDisHoeffInd <- function(x, probs1, probs2, lower.tail = T, error = 10^-5) {
+pDisHoeffInd <- function(x, probs1, probs2, lower.tail = T, error = 0.01) { # 10^-5
   if (!isProbVector(probs1) || !isProbVector(probs2)) {
     stop("either probs1 or probs2 in pDisHoeffInd is not a probability vector.")
   }
@@ -623,7 +623,7 @@ tauStarTest <- function(x, y, mode="auto", resamples = 1000, error = 0.01) {
   } else if (mode == "discrete") {
     p = as.numeric(table(x)) / n
     q = as.numeric(table(y)) / n
-    toReturn$pVal = 1 - pDisHoeffInd(n * toReturn$tStar, probs1 = p, probs2 = q)
+    toReturn$pVal = 1 - pDisHoeffInd(n * toReturn$tStar, probs1 = p, probs2 = q, error = error)
 
   } else if (mode == "mixed") {
     if (xIsDis && yIsDis) {
