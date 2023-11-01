@@ -318,7 +318,7 @@ arma::vec HoeffIndMixedCdfRCPP(arma::vec x, arma::vec eigenP, double maxError) {
   arma::vec cdfVals(x.size());
   for (int i = 0; i < x.size(); i++) {
     cdfVals[i] = boundInZeroOne(
-      numericalCfInversion(amcie, x[i], 20.0, maxError, 12));
+      numericalCfInversion(amcie, x[i], 10.0, maxError, 12));
   }
   return cdfVals;
 }
