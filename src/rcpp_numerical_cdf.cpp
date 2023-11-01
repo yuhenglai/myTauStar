@@ -170,19 +170,19 @@ double numericalCfInversion(IntegrandEvaluator& intEval, double x, double T,
   double widthChange = std::fabs(static_cast<double>(oldIntVal - intVal)) + convCrit + 1;
 
   int k = 0;
-  while (k < 1 || (std::max(bisectChange, widthChange) >= convCrit && k < maxIter)) {
-    oldIntVal = intVal;
-    if (bisectChange > widthChange) {
-      bisect(positions, values, intEval, x, integrandError);
-      intVal = riemannIntegrate(positions, values);
-      bisectChange = std::fabs(static_cast<double>(oldIntVal - intVal));
-    } else {
-      doubleWidth(positions, values, intEval, x, integrandError);
-      intVal = riemannIntegrate(positions, values);
-      widthChange = std::fabs(static_cast<double>(oldIntVal - intVal));
-    }
-    k++;
-  }
+  // while (k < 1 || (std::max(bisectChange, widthChange) >= convCrit && k < maxIter)) {
+  //   oldIntVal = intVal;
+  //   if (bisectChange > widthChange) {
+  //     bisect(positions, values, intEval, x, integrandError);
+  //     intVal = riemannIntegrate(positions, values);
+  //     bisectChange = std::fabs(static_cast<double>(oldIntVal - intVal));
+  //   } else {
+  //     doubleWidth(positions, values, intEval, x, integrandError);
+  //     intVal = riemannIntegrate(positions, values);
+  //     widthChange = std::fabs(static_cast<double>(oldIntVal - intVal));
+  //   }
+  //   k++;
+  // }
 
   if (k == maxIter) {
     Rcpp::warning("Max iterations reached, cannot guarentee convergence.\n");
