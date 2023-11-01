@@ -62,6 +62,7 @@ std::complex<double> AMCIE::integrand(double x, double t, double maxError) {
     if (std::fabs(eigenP[i]) > precision) {
       int sign = getSinhSign((v * eigenP[i]).imag());
       std::complex<double> sinhProdVal = sinhProd(v * eigenP[i], 1);
+      rprintf("$eigen: $sign $imag", sign = sign, eigen = eigenP[i], imag = sinhProdVal.imag());
       if (sinhProdVal.imag() * sign <= 0) {
         sinhProdVal *= -1;
       }
