@@ -143,9 +143,9 @@ double numericalCfInversion(IntegrandEvaluator& intEval, double x, double T,
   if (x <= 0) {
     return 0;
   }
-  double integrandError = convCrit * .0001;
+  double integrandError = 0.1; // convCrit * .0001
 
-  int numInts = 10;
+  int numInts = 5;
   double intWidth = T / numInts;
   arma::vec positions(numInts);
   arma::vec values(numInts);
@@ -170,7 +170,7 @@ double numericalCfInversion(IntegrandEvaluator& intEval, double x, double T,
   double widthChange = std::fabs(static_cast<double>(oldIntVal - intVal)) + convCrit + 1;
 
   int k = 0;
-  while (k < 5 || (std::max(bisectChange, widthChange) >= convCrit && k < maxIter)) {
+  while (k < 1 || (std::max(bisectChange, widthChange) >= convCrit && k < maxIter)) {
     oldIntVal = intVal;
     if (bisectChange > widthChange) {
       bisect(positions, values, intEval, x, integrandError);
