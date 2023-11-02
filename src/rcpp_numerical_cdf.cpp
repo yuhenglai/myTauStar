@@ -145,7 +145,7 @@ double numericalCfInversion(IntegrandEvaluator& intEval, double x, double T,
   }
   double integrandError = 0.1; // convCrit * .0001
 
-  int numInts = 3;
+  int numInts = 5;
   double intWidth = T / numInts;
   arma::vec positions(numInts);
   arma::vec values(numInts);
@@ -318,7 +318,7 @@ arma::vec HoeffIndMixedCdfRCPP(arma::vec x, arma::vec eigenP, double maxError) {
   arma::vec cdfVals(x.size());
   for (int i = 0; i < x.size(); i++) {
     cdfVals[i] = boundInZeroOne(
-      numericalCfInversion(amcie, x[i], 20.0, maxError, 12));
+      numericalCfInversion(amcie, x[i], 10.0, maxError, 12));
   }
   return cdfVals;
 }
