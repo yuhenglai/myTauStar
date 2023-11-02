@@ -284,8 +284,8 @@ arma::vec HoeffIndDiscreteCdfRCPP(arma::vec x, arma::vec eigenP,
                                                4000000.0);
   arma::vec cdfVals(x.size());
   for (int i = 0; i < x.size(); i++) {
-    cdfVals[i] = boundInZeroOne(numericalCfInversion(adcie, x[i], intervalWidth,
-                                                     maxError, 17));
+    cdfVals[i] = boundInZeroOne(numericalCfInversion(adcie, x[i], 10,
+                                                     maxError, 12));
   }
   return cdfVals;
 }
