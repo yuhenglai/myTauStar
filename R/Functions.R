@@ -638,7 +638,12 @@ tauStarTest <- function(x, y, mode="auto", resamples = 1000, error = 0.01) {
       x = y
       y = z
     }
-    p = as.numeric(table(y)) / n
+    if (length(unique(y)) <= 20) 
+        p = as.numeric(table(y))/n
+    else {
+        lbr = quantile(y, 0:20/20)
+        p = hist(y, breaks = unique(lbr))$counts/n
+    }
     toReturn$pVal = 1 - pMixHoeffInd(n * toReturn$tStar, probs = p, error = error)
   } else if (mode == "permutation") {
     sampleTStars = numeric(resamples)
