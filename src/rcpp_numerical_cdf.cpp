@@ -207,7 +207,7 @@ arma::vec HoeffIndCdfRCPP(arma::vec x, double maxError) {
   arma::vec cdfVals(x.size());
   for (int i = 0; i < x.size(); i++) {
     cdfVals[i] = boundInZeroOne(
-      numericalCfInversion(acie, x[i], 50.0, maxError, 12));
+      numericalCfInversion(acie, x[i], 10.0, maxError, 12));
   }
   return cdfVals;
 }
