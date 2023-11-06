@@ -221,7 +221,7 @@ arma::vec HoeffIndPdfRCPP(arma::vec x, double maxError) {
   arma::vec pdfVals(x.size());
   for (int i = 0; i < x.size(); i++) {
     pdfVals[i] = std::max(
-      numericalCfInversion(apie, x[i], 50.0, maxError, 12),
+      numericalCfInversion(apie, x[i], 10.0, maxError, 12),
       0.0); // TODO: 50.0 hardcoded for now
   }
   return pdfVals;
