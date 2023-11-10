@@ -138,7 +138,7 @@ arma::umat ranksToLeqMat(const arma::uvec& xRanks, const arma::uvec& yRanks) {
  * @param leqMat a leqMat as created by ranksToLeqMat.
  * @return the unique count matrix.
  */
-arma::umat leqMatToUniqueCountMat(const arma::umat& leqMat, const int xmax = leqMat.n_rows, const int ymax = leqMat.n_cols) {
+arma::umat leqMatToUniqueCountMat(const arma::umat& leqMat) {
   arma::umat uCountMat = arma::zeros<arma::umat>(leqMat.n_rows, leqMat.n_cols);
   for (int i = 1; i < leqMat.n_rows; i++) {
     for (int j = 1; j < leqMat.n_cols; j++) {
