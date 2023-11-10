@@ -255,8 +255,8 @@ double TStarHellerAndHellerRCPP(const arma::vec& x, const arma::vec& y) {
     int xRankMin = xRanks[i];
     for (int cnt = 1; cnt <= ymax; cnt++){
       if (yRankCount[cnt] == 0) continue;
-      int yRankMin = std::min(yRanks[i], cnt);
-      int yRankMax = std::max(yRanks[i], cnt);
+      int yRankMin = std::min(int(yRanks[i]), cnt);
+      int yRankMax = std::max(int(yRanks[i]), cnt);
 
       int bot = leqMat(xRankMin - 1, yRankMin - 1);
       int mid = (yRankMin == yRankMax) ? 0 :
