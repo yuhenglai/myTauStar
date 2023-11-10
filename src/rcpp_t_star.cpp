@@ -138,7 +138,7 @@ arma::umat ranksToLeqMat(const arma::uvec& xRanks, const arma::uvec& yRanks) {
  * @param leqMat a leqMat as created by ranksToLeqMat.
  * @return the unique count matrix.
  */
-arma::umat leqMatToUniqueCountMat(const arma::umat& leqMat) {
+arma::umat leqMatToUniqueCountMat(const arma::umat& leqMat, const int xmax = leqMat.n_rows, const int ymax = leqMat.n_cols) {
   arma::umat uCountMat = arma::zeros<arma::umat>(leqMat.n_rows, leqMat.n_cols);
   for (int i = 1; i < leqMat.n_rows; i++) {
     for (int j = 1; j < leqMat.n_cols; j++) {
@@ -180,6 +180,53 @@ arma::uvec indexUvec(const arma::uvec& x, const arma::uvec& inds) {
  * @return the U-statistic computed upon the two input vectors.
  */
 // [[Rcpp::export]]
+// double TStarHellerAndHellerRCPP(const arma::vec& x, const arma::vec& y) {
+//   arma::uvec xRanks = vecToRanks(x);
+//   arma::uvec yRanks = vecToRanks(y);
+//   arma::umat leqMat = ranksToLeqMat(xRanks, yRanks);
+//   arma::uvec xOrder = arma::sort_index(xRanks);
+//   xRanks = indexUvec(xRanks, xOrder);
+//   yRanks = indexUvec(yRanks, xOrder);
+
+//   arma::umat uCountMat = leqMatToUniqueCountMat(leqMat);
+
+//   double numCon = 0;
+//   double numDis = 0;
+//   for (int i = 0; i < xRanks.n_elem - 1; i++) {
+//     for (int j = i + 1; j < xRanks.n_elem; j++) {
+//       int xRankMin = xRanks[i];
+//       int yRankMin = std::min(yRanks[i], yRanks[j]);
+//       int yRankMax = std::max(yRanks[i], yRanks[j]);
+
+//       int bot = leqMat(xRankMin - 1, yRankMin - 1);
+//       int mid = (yRankMin == yRankMax) ? 0 :
+//         leqMat(xRankMin - 1, yRankMax - 1) - leqMat(xRankMin - 1, yRankMin);
+//       int top = leqMat(xRankMin - 1, leqMat.n_cols - 1) -
+//                  leqMat(xRankMin - 1, yRankMax);
+//       int eqMin = leqMat(xRankMin - 1, yRankMin) -
+//         leqMat(xRankMin - 1, yRankMin - 1);
+//       int eqMax = leqMat(xRankMin - 1, yRankMax) -
+//         leqMat(xRankMin - 1, yRankMax - 1);
+
+//       numCon += top * (top - 1) / 2.0 + bot * (bot - 1) / 2.0;
+
+//       if (yRankMin != yRankMax) {
+//         numDis += top * (mid + eqMin + bot) + bot * (mid + eqMax) +
+//           eqMin * (mid + eqMax) +
+//           eqMax * mid + mid * (mid - 1) / 2.0;
+//         numDis -= uCountMat(xRankMin - 1, yRankMax - 1) -
+//           uCountMat(xRankMin - 1, yRankMin);
+//       }
+//     }
+//   }
+
+//   int n = xRanks.n_elem;
+//   double c = 16 * numCon - 8 * numDis;
+//   double d = (c < 0) ? -1 : 1;
+//   return d * expl(logl(d * c) - (logl(n) + logl(n - 1) +
+//                                logl(n - 2) + logl(n - 3)));
+// }
+
 double TStarHellerAndHellerRCPP(const arma::vec& x, const arma::vec& y) {
   arma::uvec xRanks = vecToRanks(x);
   arma::uvec yRanks = vecToRanks(y);
@@ -188,15 +235,28 @@ double TStarHellerAndHellerRCPP(const arma::vec& x, const arma::vec& y) {
   xRanks = indexUvec(xRanks, xOrder);
   yRanks = indexUvec(yRanks, xOrder);
 
+	
+  ///////////////////////////////////////////////////
+  ///////////////////////////////////////////////////
+  int ymax = yRanks.max();
+  int xmax = xRanks[xRanks.n_elem - 1];
+
   arma::umat uCountMat = leqMatToUniqueCountMat(leqMat);
 
   double numCon = 0;
   double numDis = 0;
+
+  arma::uvec yRankCount = arma::zeros<arma::uvec>(ymax + 1);
+  for (int i = 1; i <= ymax; i++) {
+    yRankCount[i] = leqMat(xmax, i) - leqMat(xmax, i - 1);
+  }
   for (int i = 0; i < xRanks.n_elem - 1; i++) {
-    for (int j = i + 1; j < xRanks.n_elem; j++) {
-      int xRankMin = xRanks[i];
-      int yRankMin = std::min(yRanks[i], yRanks[j]);
-      int yRankMax = std::max(yRanks[i], yRanks[j]);
+    yRankCount[yRanks[i]] -= 1;
+    int xRankMin = xRanks[i];
+    for (int cnt = 1; cnt <= ymax; cnt++){
+      if (yRankCount[cnt] == 0) continue;
+      int yRankMin = std::min(yRanks[i], cnt);
+      int yRankMax = std::max(yRanks[i], cnt);
 
       int bot = leqMat(xRankMin - 1, yRankMin - 1);
       int mid = (yRankMin == yRankMax) ? 0 :
@@ -208,17 +268,47 @@ double TStarHellerAndHellerRCPP(const arma::vec& x, const arma::vec& y) {
       int eqMax = leqMat(xRankMin - 1, yRankMax) -
         leqMat(xRankMin - 1, yRankMax - 1);
 
-      numCon += top * (top - 1) / 2.0 + bot * (bot - 1) / 2.0;
+      numCon += yRankCount[cnt] * (top * (top - 1) / 2.0 + bot * (bot - 1) / 2.0);
 
       if (yRankMin != yRankMax) {
         numDis += top * (mid + eqMin + bot) + bot * (mid + eqMax) +
           eqMin * (mid + eqMax) +
           eqMax * mid + mid * (mid - 1) / 2.0;
-        numDis -= uCountMat(xRankMin - 1, yRankMax - 1) -
-          uCountMat(xRankMin - 1, yRankMin);
+        numDis -= yRankCount[cnt] * (uCountMat(xRankMin - 1, yRankMax - 1) -
+          uCountMat(xRankMin - 1, yRankMin));
       }
-    }
+    }	    
   }
+  ///////////////////////////////////////////////////
+  ///////////////////////////////////////////////////
+
+  // for (int i = 0; i < xRanks.n_elem - 1; i++) {
+  //   for (int j = i + 1; j < xRanks.n_elem; j++) {
+  //     int xRankMin = xRanks[i];
+  //     int yRankMin = std::min(yRanks[i], yRanks[j]);
+  //     int yRankMax = std::max(yRanks[i], yRanks[j]);
+
+  //     int bot = leqMat(xRankMin - 1, yRankMin - 1);
+  //     int mid = (yRankMin == yRankMax) ? 0 :
+  //       leqMat(xRankMin - 1, yRankMax - 1) - leqMat(xRankMin - 1, yRankMin);
+  //     int top = leqMat(xRankMin - 1, leqMat.n_cols - 1) -
+  //                leqMat(xRankMin - 1, yRankMax);
+  //     int eqMin = leqMat(xRankMin - 1, yRankMin) -
+  //       leqMat(xRankMin - 1, yRankMin - 1);
+  //     int eqMax = leqMat(xRankMin - 1, yRankMax) -
+  //       leqMat(xRankMin - 1, yRankMax - 1);
+
+  //     numCon += top * (top - 1) / 2.0 + bot * (bot - 1) / 2.0;
+
+  //     if (yRankMin != yRankMax) {
+  //       numDis += top * (mid + eqMin + bot) + bot * (mid + eqMax) +
+  //         eqMin * (mid + eqMax) +
+  //         eqMax * mid + mid * (mid - 1) / 2.0;
+  //       numDis -= uCountMat(xRankMin - 1, yRankMax - 1) -
+  //         uCountMat(xRankMin - 1, yRankMin);
+  //     }
+  //   }
+  // }
 
   int n = xRanks.n_elem;
   double c = 16 * numCon - 8 * numDis;
