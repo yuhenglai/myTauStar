@@ -268,19 +268,18 @@ double TStarHellerAndHellerRCPP(const arma::vec& x, const arma::vec& y) {
 double VTStarHellerAndHellerRCPP(const arma::vec& x, const arma::vec& y) {
   arma::uvec xRanks = vecToRanks(x);
   arma::uvec yRanks = vecToRanks(y);
-  arma::umat leqMat = ranksToLeqMat(xRanks, yRanks);
+  double** leqMat = ranksToLeqMat(xRanks, yRanks);
+  double** uCountMat = leqMatToUniqueCountMat(leqMat, xRanks.max() + 1, yRanks.max() + 1);
   arma::uvec xOrder = arma::sort_index(xRanks);
   xRanks = indexUvec(xRanks, xOrder);
   yRanks = indexUvec(yRanks, xOrder);
 
-  arma::umat uCountMat = leqMatToUniqueCountMat(leqMat);
-
   double numCon = 0;
   double numDis = 0;
   for (int i = 0; i < xRanks.n_elem; i++) {
-    int top = leqMat(xRanks[i] - 1, leqMat.n_cols - 1) -
-      leqMat(xRanks[i] - 1, yRanks[i]);
-    int bot = leqMat(xRanks[i] - 1, yRanks[i] - 1);
+    int top = leqMat[xRanks[i] - 1][yRanks.max()] -
+      leqMat[xRanks[i] - 1][yRanks[i]];
+    int bot = leqMat[xRanks[i] - 1][yRanks[i] - 1];
     numCon += 0.5 * (top * (top - 1) / 2.0 + bot * (bot - 1) / 2.0) +
       0.25 * (top + bot);
 
@@ -289,15 +288,15 @@ double VTStarHellerAndHellerRCPP(const arma::vec& x, const arma::vec& y) {
       int yRankMin = std::min(yRanks[i], yRanks[j]);
       int yRankMax = std::max(yRanks[i], yRanks[j]);
 
-      int bot = leqMat(xRankMin - 1, yRankMin - 1);
+      int bot = leqMat[xRankMin - 1][yRankMin - 1];
       int mid = (yRankMin == yRankMax) ? 0 :
-        leqMat(xRankMin - 1, yRankMax - 1) - leqMat(xRankMin - 1, yRankMin);
-      int top = leqMat(xRankMin - 1, leqMat.n_cols - 1) -
-        leqMat(xRankMin - 1, yRankMax);
-      int eqMin = leqMat(xRankMin - 1, yRankMin) -
-        leqMat(xRankMin - 1, yRankMin - 1);
-      int eqMax = leqMat(xRankMin - 1, yRankMax) -
-        leqMat(xRankMin - 1, yRankMax - 1);
+        leqMat[xRankMin - 1][yRankMax - 1] - leqMat[xRankMin - 1][yRankMin];
+      int top = leqMat[xRankMin - 1][yRanks.max()] -
+        leqMat[xRankMin - 1][yRankMax];
+      int eqMin = leqMat[xRankMin - 1][yRankMin] -
+        leqMat[xRankMin - 1][yRankMin - 1];
+      int eqMax = leqMat[xRankMin - 1][yRankMax] -
+        leqMat[xRankMin - 1][yRankMax - 1];
 
       numCon += top * (top - 1) / 2.0 + bot * (bot - 1) / 2.0 + 0.5 * (top + bot);
 
@@ -305,8 +304,8 @@ double VTStarHellerAndHellerRCPP(const arma::vec& x, const arma::vec& y) {
         numDis += top * (mid + eqMin + bot) + bot * (mid + eqMax) +
           eqMin * (mid + eqMax) +
           eqMax * mid + mid * (mid - 1) / 2.0;
-        numDis -= uCountMat(xRankMin - 1, yRankMax - 1) -
-          uCountMat(xRankMin - 1, yRankMin);
+        numDis -= uCountMat[xRankMin - 1][yRankMax - 1] -
+          uCountMat[xRankMin - 1][yRankMin];
       }
     }
   }
