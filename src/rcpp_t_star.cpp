@@ -29,7 +29,9 @@
 #include<ctype.h>
 #include<cmath>
 #include<algorithm>
-
+#include<iostream>
+#include <cstdint>
+#include <vector>
 using namespace Rcpp;
 
 // [[Rcpp::depends(RcppArmadillo)]]
@@ -114,12 +116,12 @@ arma::uvec vecToRanks(const arma::vec& x) {
  * @param yRanks a vector of ranks (must be the same length as x).
  * @return the "less than or equal" to matrix.
  */
-double** ranksToLeqMat(const arma::uvec& xRanks, const arma::uvec& yRanks) {
+long long** ranksToLeqMat(const arma::uvec& xRanks, const arma::uvec& yRanks) {
   int xMax = xRanks.max();
   int yMax = yRanks.max();
-  double **leqMat = new double*[xMax + 1];
+  long long **leqMat = new long long*[xMax + 1];
   for(int i = 0; i < xMax + 1; ++i) {
-    leqMat[i] = new double[yMax + 1]();
+    leqMat[i] = new long long[yMax + 1]();
   }
 //   arma::umat leqMat = arma::zeros<arma::umat>(xMax + 1, yMax + 1);
   for (int i = 0; i < xRanks.n_elem; i++) {
@@ -141,14 +143,14 @@ double** ranksToLeqMat(const arma::uvec& xRanks, const arma::uvec& yRanks) {
  * @param leqMat a leqMat as created by ranksToLeqMat.
  * @return the unique count matrix.
  */
-double** leqMatToUniqueCountMat(double** leqMat, int sizeX, int sizeY) {
-  double **uCountMat = new double*[sizeX];
+long long** leqMatToUniqueCountMat(long long** leqMat, int sizeX, int sizeY) {
+  long long **uCountMat = new long long*[sizeX];
   for(int i = 0; i < sizeX; ++i) {
-    uCountMat[i] = new double[sizeY]();
+    uCountMat[i] = new long long[sizeY]();
   }
   for (int i = 1; i < sizeX; i++) {
     for (int j = 1; j < sizeY; j++) {
-      int numEqYAndLessOrEqX = leqMat[i][j] - leqMat[i][j - 1];
+      long long numEqYAndLessOrEqX = leqMat[i][j] - leqMat[i][j - 1];
       uCountMat[i][j] = uCountMat[i][j - 1] +
         (numEqYAndLessOrEqX * (numEqYAndLessOrEqX - 1)) / 2;
     }
@@ -189,8 +191,8 @@ arma::uvec indexUvec(const arma::uvec& x, const arma::uvec& inds) {
 double TStarHellerAndHellerRCPP(const arma::vec& x, const arma::vec& y) {
   arma::uvec xRanks = vecToRanks(x);
   arma::uvec yRanks = vecToRanks(y);
-  double** leqMat = ranksToLeqMat(xRanks, yRanks);
-  double** uCountMat = leqMatToUniqueCountMat(leqMat, xRanks.max() + 1, yRanks.max() + 1);
+  long long** leqMat = ranksToLeqMat(xRanks, yRanks);
+  long long** uCountMat = leqMatToUniqueCountMat(leqMat, xRanks.max() + 1, yRanks.max() + 1);
   arma::uvec xOrder = arma::sort_index(xRanks);
   xRanks = indexUvec(xRanks, xOrder);
   yRanks = indexUvec(yRanks, xOrder);
@@ -201,9 +203,9 @@ double TStarHellerAndHellerRCPP(const arma::vec& x, const arma::vec& y) {
   int ymax = yRanks.max();
   int xmax = xRanks[xRanks.n_elem - 1];
 
-  double numCon = 0;
-  double numDis = 0;
-  int yRankCount[int(ymax + 1)] = {0};
+  long long numCon = 0;
+  long long numDis = 0;
+  std::vector<long long> yRankCount(ymax + 1, 0);
   for (int i = 1; i <= ymax; i++) {
     yRankCount[i] = leqMat[xmax][i] - leqMat[xmax][i - 1];
   }
@@ -215,14 +217,14 @@ double TStarHellerAndHellerRCPP(const arma::vec& x, const arma::vec& y) {
       int yRankMin = std::min(int(yRanks[i]), cnt);
       int yRankMax = std::max(int(yRanks[i]), cnt);
 
-      int bot = leqMat[xRankMin - 1][yRankMin - 1];
-      int mid = (yRankMin == yRankMax) ? 0 :
+      long long bot = leqMat[xRankMin - 1][yRankMin - 1];
+      long long mid = (yRankMin == yRankMax) ? 0 :
         leqMat[xRankMin - 1][yRankMax - 1] - leqMat[xRankMin - 1][yRankMin];
-      int top = leqMat[xRankMin - 1][ymax] -
+      long long top = leqMat[xRankMin - 1][ymax] -
                  leqMat[xRankMin - 1][yRankMax];
-      int eqMin = leqMat[xRankMin - 1][yRankMin] -
+      long long eqMin = leqMat[xRankMin - 1][yRankMin] -
         leqMat[xRankMin - 1][yRankMin - 1];
-      int eqMax = leqMat[xRankMin - 1][yRankMax] -
+      long long eqMax = leqMat[xRankMin - 1][yRankMax] -
         leqMat[xRankMin - 1][yRankMax - 1];
 
       numCon += yRankCount[cnt] * (top * (top - 1) / 2.0 + bot * (bot - 1) / 2.0);
@@ -246,7 +248,7 @@ double TStarHellerAndHellerRCPP(const arma::vec& x, const arma::vec& y) {
   delete [] uCountMat;
   int n = xRanks.n_elem;
 
-  double c = 16 * numCon - 8 * numDis;
+  long long c = 16 * numCon - 8 * numDis;
   double d = (c < 0) ? -1 : 1;
   return d * expl(logl(d * c) - (logl(n) + logl(n - 1) +
                                logl(n - 2) + logl(n - 3)));
